@@ -1718,14 +1718,15 @@ class LoadImageMask:
         files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
         return {"required":
                     {"image": (sorted(files), {"image_upload": True}),
-                     "channel": (s._color_channels, ), }
+                     "channel": (s._color_channels, ), 
+                     "variable": ("STRING", {"multiline": False, "required": False }), }
                 }
 
     CATEGORY = "mask"
 
     RETURN_TYPES = ("MASK",)
     FUNCTION = "load_image"
-    def load_image(self, image, channel):
+    def load_image(self, image, channel, variable):
         image_path = folder_paths.get_annotated_filepath(image)
         i = node_helpers.pillow(Image.open, image_path)
         i = node_helpers.pillow(ImageOps.exif_transpose, i)
@@ -1742,15 +1743,15 @@ class LoadImageMask:
                 mask = 1. - mask
         else:
             mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
-        return (mask.unsqueeze(0),)
+        return (mask.unsqueeze(0))
 
     @classmethod
-    def IS_CHANGED(s, image, channel):
+    def IS_CHANGED(s, image, channel, variable):
         image_path = folder_paths.get_annotated_filepath(image)
         m = hashlib.sha256()
         with open(image_path, 'rb') as f:
             m.update(f.read())
-        return m.digest().hex()
+        return f'{m.digest().hex()}_{variable}'
 
     @classmethod
     def VALIDATE_INPUTS(s, image):
