@@ -1743,7 +1743,7 @@ class LoadImageMask:
                 mask = 1. - mask
         else:
             mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
-        return (mask.unsqueeze(0))
+        return (mask.unsqueeze(0),)
 
     @classmethod
     def IS_CHANGED(s, image, channel, variable):
