@@ -4,7 +4,7 @@ from aiohttp import web
 # 定义全局上下文变量
 current_request_var = contextvars.ContextVar("current_request", default=None)
 
-async def create_request_context_middleware(app, handler):
+async def create_request_context_middleware():
     @web.middleware
     async def request_context_middleware(request: web.Request, handler):
         token = current_request_var.set(request)  # 存储请求

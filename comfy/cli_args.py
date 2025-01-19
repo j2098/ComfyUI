@@ -43,6 +43,9 @@ parser.add_argument("--tls-certfile", type=str, help="Path to TLS (SSL) certific
 parser.add_argument("--enable-cors-header", type=str, default=None, metavar="ORIGIN", nargs="?", const="*", help="Enable CORS (Cross-Origin Resource Sharing) with optional origin or allow all with default '*'.")
 parser.add_argument("--max-upload-size", type=float, default=100, help="Set the maximum upload size in MB.")
 
+parser.add_argument("--enable-auth", type=str, default=None, metavar="ORIGIN", nargs="?", const="*", help="Enable User Authentication.")
+parser.add_argument("--auth-key", type=str, default=None, metavar="KEY", nargs="?", const="*", help="Set the authentication key.")
+
 parser.add_argument("--extra-model-paths-config", type=str, default=None, metavar="PATH", nargs='+', action='append', help="Load one or more extra_model_paths.yaml files.")
 parser.add_argument("--output-directory", type=str, default=None, help="Set the ComfyUI output directory.")
 parser.add_argument("--temp-directory", type=str, default=None, help="Set the ComfyUI temp directory (default is in the ComfyUI directory).")
