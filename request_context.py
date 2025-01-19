@@ -25,8 +25,13 @@ class RequestContext:
 
     @staticmethod
     def set_var(key: str, value):
-        current_request_var.set(value)
+        request = RequestContext.get_current_request()
+        if request:
+            request[key] = value
 
     @staticmethod
     def get_var(key: str):
-        return current_request_var.get().get(key)
+        request = RequestContext.get_current_request()
+        if request:
+            return request.get(key)
+        return None
