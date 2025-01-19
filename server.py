@@ -33,6 +33,8 @@ from app.model_manager import ModelFileManager
 from app.custom_node_manager import CustomNodeManager
 from typing import Optional
 from api_server.routes.internal.internal_routes import InternalRoutes
+import jwt
+from request_context import create_request_context_middleware, RequestContext
 
 class BinaryEventTypes:
     PREVIEW_IMAGE = 1
@@ -108,6 +110,28 @@ def is_loopback(host):
 
     return loopback
 
+def create_auth_middleware():
+    @web.middleware
+    async def auth_middleware(request: web.Request, handler):
+        token = request.headers.get("Authorization")
+        if not token:
+            return web.json_response({"error": "Missing token"}, status=401)
+        
+        # JWT Token
+        try:
+            payload = jwt.decode(token, args.auth_key, algorithms=["HS256"])
+            RequestContext.set_var("user", json.loads(payload))
+        except jwt.ExpiredSignatureError:
+            return web.json_response({"error": "Token expired"}, status=401)
+        except jwt.InvalidTokenError:
+            return web.json_response({"error": "Invalid token"}, status=401)
+        
+       
+        
+        return await handler(request)
+    return auth_middleware
+
+
 
 def create_origin_only_middleware():
     @web.middleware
@@ -168,7 +192,9 @@ class PromptServer():
             middlewares.append(create_cors_middleware(args.enable_cors_header))
         else:
             middlewares.append(create_origin_only_middleware())
-
+        if args.enable_auth:
+            middlewares.append(create_auth_middleware())
+        middlewares.append(create_request_context_middleware())
         max_upload_size = round(args.max_upload_size * 1024 * 1024)
         self.app = web.Application(client_max_size=max_upload_size, middlewares=middlewares)
         self.sockets = dict()

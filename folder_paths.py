@@ -6,7 +6,7 @@ import mimetypes
 import logging
 from typing import Literal
 from collections.abc import Collection
-
+from request_context import RequestContext
 supported_pt_extensions: set[str] = {'.ckpt', '.pt', '.bin', '.pth', '.safetensors', '.pkl', '.sft'}
 
 folder_names_and_paths: dict[str, tuple[list[str], set[str]]] = {}
@@ -105,18 +105,27 @@ def set_input_directory(input_dir: str) -> None:
 
 def get_output_directory() -> str:
     global output_directory
-    return output_directory
+    return _get_request_user_directory(output_directory)
 
 def get_temp_directory() -> str:
     global temp_directory
-    return temp_directory
+    return _get_request_user_directory(temp_directory)
+
+def _get_request_user_directory(source):
+    user = RequestContext.get_var("user")
+    if user:
+        ret = os.path.join(source, user["id"])
+        if not os.path.exists(ret):
+            os.makedirs(ret)
+        return ret  
+    return source
 
 def get_input_directory() -> str:
     global input_directory
-    return input_directory
+    return _get_request_user_directory(input_directory)
 
 def get_user_directory() -> str:
-    return user_directory
+    return _get_request_user_directory(user_directory)
 
 def set_user_directory(user_dir: str) -> None:
     global user_directory
