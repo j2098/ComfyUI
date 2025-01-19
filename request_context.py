@@ -1,7 +1,6 @@
 import contextvars
 from aiohttp import web
 
-# 定义全局上下文变量
 current_request_var = contextvars.ContextVar("current_request", default=None)
 
 class RequestContext:
