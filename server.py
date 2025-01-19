@@ -34,7 +34,7 @@ from app.custom_node_manager import CustomNodeManager
 from typing import Optional
 from api_server.routes.internal.internal_routes import InternalRoutes
 import jwt
-from request_context import create_request_context_middleware, RequestContext
+from request_context import RequestContext
 
 class BinaryEventTypes:
     PREVIEW_IMAGE = 1
@@ -109,6 +109,17 @@ def is_loopback(host):
             pass
 
     return loopback
+
+def create_request_context_middleware():
+    @web.middleware
+    async def request_context_middleware(request: web.Request, handler):
+        token = RequestContext.set_current_request(request)  
+        try:
+            response = await handler(request)
+        finally:
+            RequestContext.reset(token)  
+        return response
+    return request_context_middleware
 
 def create_auth_middleware():
     @web.middleware
@@ -188,13 +199,14 @@ class PromptServer():
         self.number = 0
 
         middlewares = [cache_control]
+        middlewares.append(create_request_context_middleware())
         if args.enable_cors_header:
             middlewares.append(create_cors_middleware(args.enable_cors_header))
         else:
             middlewares.append(create_origin_only_middleware())
         if args.enable_auth:
             middlewares.append(create_auth_middleware())
-        middlewares.append(create_request_context_middleware())
+        
         max_upload_size = round(args.max_upload_size * 1024 * 1024)
         self.app = web.Application(client_max_size=max_upload_size, middlewares=middlewares)
         self.sockets = dict()
