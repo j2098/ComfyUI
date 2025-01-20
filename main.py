@@ -1,4 +1,5 @@
 import comfy.options
+from request_context import RequestContext
 comfy.options.enable_args_parsing()
 
 import os
@@ -165,25 +166,34 @@ def prompt_worker(q, server_instance):
 
         queue_item = q.get(timeout=timeout)
         if queue_item is not None:
+            # test111
+
             item, item_id = queue_item
-            execution_start_time = time.perf_counter()
-            prompt_id = item[1]
-            server_instance.last_prompt_id = prompt_id
+            user_id = item[5]
+            logging.info(f"user_id: {user_id}")
+            token = RequestContext.set_current_request({})
+            try:
+                RequestContext.set_var("user", {"userId": user_id})
+                execution_start_time = time.perf_counter()
+                prompt_id = item[1]
+                server_instance.last_prompt_id = prompt_id
 
-            e.execute(item[2], prompt_id, item[3], item[4])
-            need_gc = True
-            q.task_done(item_id,
-                        e.history_result,
-                        status=execution.PromptQueue.ExecutionStatus(
-                            status_str='success' if e.success else 'error',
-                            completed=e.success,
-                            messages=e.status_messages))
-            if server_instance.client_id is not None:
-                server_instance.send_sync("executing", {"node": None, "prompt_id": prompt_id}, server_instance.client_id)
+                e.execute(item[2], prompt_id, item[3], item[4])
+                need_gc = True
+                q.task_done(item_id,
+                            e.history_result,
+                            status=execution.PromptQueue.ExecutionStatus(
+                                status_str='success' if e.success else 'error',
+                                completed=e.success,
+                                messages=e.status_messages))
+                if server_instance.client_id is not None:
+                    server_instance.send_sync("executing", {"node": None, "prompt_id": prompt_id}, server_instance.client_id)
 
-            current_time = time.perf_counter()
-            execution_time = current_time - execution_start_time
-            logging.info("Prompt executed in {:.2f} seconds".format(execution_time))
+                current_time = time.perf_counter()
+                execution_time = current_time - execution_start_time
+                logging.info("Prompt executed in {:.2f} seconds".format(execution_time))
+            finally:
+                RequestContext.reset(token)
 
         flags = q.get_flags()
         free_memory = flags.get("free_memory", False)

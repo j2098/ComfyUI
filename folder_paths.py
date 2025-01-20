@@ -188,7 +188,7 @@ def get_annotated_filepath(name: str, default_dir: str | None=None) -> str:
 
     if base_dir is None:
         if default_dir is not None:
-            base_dir = default_dir
+            base_dir = _get_request_user_directory(default_dir)
         else:
             base_dir = get_input_directory()  # fallback path
 

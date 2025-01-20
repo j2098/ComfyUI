@@ -878,6 +878,7 @@ class PromptQueue:
         self.currently_running = {}
         self.history = {}
         self.flags = {}
+        self.user_id = None
         server.prompt_queue = self
 
     def put(self, item):
@@ -897,6 +898,7 @@ class PromptQueue:
             self.currently_running[i] = copy.deepcopy(item)
             self.task_counter += 1
             self.server.queue_updated()
+            self.user_id = item[5]
             return (item, i)
 
     class ExecutionStatus(NamedTuple):

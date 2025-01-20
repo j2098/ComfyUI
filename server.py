@@ -127,7 +127,11 @@ def create_auth_middleware():
     async def auth_middleware(request: web.Request, handler):
         token = request.headers.get("Authorization")
         if not token:
-            return web.json_response({"error": "Missing token"}, status=401)
+            token = request.query.get("token");
+            if not token:
+                token = request.cookies.get("token");
+                if not token:   
+                    return web.json_response({"error": "Missing token"}, status=401)
         
         # JWT Token
         try:
@@ -142,7 +146,14 @@ def create_auth_middleware():
         
        
         
-        return await handler(request)
+        response = await handler(request)
+        response.set_cookie(
+            "token", 
+            token, 
+            max_age=24 * 3600,  # 设置 cookie 的最大存活时间为 3600 秒
+            path="/",      # 设置 cookie 的路径
+        )
+        return response
     return auth_middleware
 
 
@@ -680,7 +691,11 @@ class PromptServer():
                 if valid[0]:
                     prompt_id = str(uuid.uuid4())
                     outputs_to_execute = valid[2]
-                    self.prompt_queue.put((number, prompt_id, prompt, extra_data, outputs_to_execute))
+                    user = RequestContext.get_var("user")
+                    user_id = None
+                    if user:
+                        user_id = user["userId"]
+                    self.prompt_queue.put((number, prompt_id, prompt, extra_data, outputs_to_execute, user_id))
                     response = {"prompt_id": prompt_id, "number": number, "node_errors": valid[3]}
                     return web.json_response(response)
                 else:

@@ -9,7 +9,7 @@ class RequestContext:
         return current_request_var.get()
     
     @staticmethod
-    def set_current_request(request: web.Request):
+    def set_current_request(request):
         return current_request_var.set(request)
     
     @staticmethod
@@ -19,12 +19,12 @@ class RequestContext:
     @staticmethod
     def set_var(key: str, value):
         request = RequestContext.get_current_request()
-        if request:
+        if request is not None:
             request[key] = value
 
     @staticmethod
     def get_var(key: str):
         request = RequestContext.get_current_request()
-        if request:
+        if request is not None:
             return request.get(key)
         return None
