@@ -17,6 +17,7 @@ import ipaddress
 from PIL import Image, ImageOps
 from PIL.PngImagePlugin import PngInfo
 from io import BytesIO
+import base64
 
 import aiohttp
 from aiohttp import web
@@ -130,8 +131,10 @@ def create_auth_middleware():
         
         # JWT Token
         try:
-            payload = jwt.decode(token, args.auth_key, algorithms=["HS512"])
-            RequestContext.set_var("user", json.loads(payload))
+            key = base64.b64encode(args.auth_key.encode()).decode()
+            payload = jwt.decode(token, key, algorithms=["HS512"])
+            payload = json.loads(payload['token'])
+            RequestContext.set_var("user", payload)
         except jwt.ExpiredSignatureError:
             return web.json_response({"error": "Token expired"}, status=401)
         except jwt.InvalidTokenError:
@@ -141,7 +144,6 @@ def create_auth_middleware():
         
         return await handler(request)
     return auth_middleware
-
 
 
 def create_origin_only_middleware():
