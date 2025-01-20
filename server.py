@@ -130,7 +130,7 @@ def create_auth_middleware():
         
         # JWT Token
         try:
-            payload = jwt.decode(token, args.auth_key, algorithms=["HS256"])
+            payload = jwt.decode(token, args.auth_key, algorithms=["HS512"])
             RequestContext.set_var("user", json.loads(payload))
         except jwt.ExpiredSignatureError:
             return web.json_response({"error": "Token expired"}, status=401)

@@ -114,7 +114,7 @@ def get_temp_directory() -> str:
 def _get_request_user_directory(source):
     user = RequestContext.get_var("user")
     if user:
-        ret = os.path.join(source, user["id"])
+        ret = os.path.join(source, user["userId"])
         if not os.path.exists(ret):
             os.makedirs(ret)
         return ret  
