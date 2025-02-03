@@ -143,9 +143,8 @@ def create_auth_middleware():
         except jwt.InvalidTokenError:
             return web.json_response({"error": "Invalid token"}, status=401)
         
-       
-        response.headers['Access-Control-Allow-Origin'] = '*'
         response = await handler(request)
+        response.headers['Access-Control-Allow-Origin'] = '*'
         response.set_cookie(
             "token", 
             token, 
