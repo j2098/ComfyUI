@@ -151,7 +151,7 @@ def create_auth_middleware():
             token, 
             max_age=24 * 3600,  # 设置 cookie 的最大存活时间为 3600 秒
             path="/",      # 设置 cookie 的路径
-            secure=False,
+            secure=True,
             samesite="None"
         )
         return response
