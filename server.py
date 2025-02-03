@@ -77,14 +77,7 @@ def create_cors_middleware(allowed_origin: str):
             response = web.Response()
         else:
             response = await handler(request)
-        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000/'
-        if 'Origin' in request.headers:
-            origin = request.headers['Origin']
-            logging.info(f"origin: {origin}")
-            if allowed_origin.find(origin) != -1:
-                response.headers['Access-Control-Allow-Origin'] = origin
-            else:
-                response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Origin'] = allowed_origin
         response.headers['Access-Control-Allow-Methods'] = 'POST, GET, DELETE, PUT, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
@@ -219,12 +212,14 @@ class PromptServer():
 
         middlewares = [cache_control]
         middlewares.append(create_request_context_middleware())
-        if args.enable_cors_header:
-            middlewares.append(create_cors_middleware(args.enable_cors_header))
-        else:
-            middlewares.append(create_origin_only_middleware())
+        
         if args.enable_auth:
             middlewares.append(create_auth_middleware())
+        else:
+            if args.enable_cors_header:
+                middlewares.append(create_cors_middleware(args.enable_cors_header))
+            else:
+                middlewares.append(create_origin_only_middleware())
         
         max_upload_size = round(args.max_upload_size * 1024 * 1024)
         self.app = web.Application(client_max_size=max_upload_size, middlewares=middlewares)
