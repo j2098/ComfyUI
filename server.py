@@ -82,6 +82,8 @@ def create_cors_middleware(allowed_origin: str):
             logging.info(f"origin: {origin}")
             if allowed_origin.find(origin) != -1:
                 response.headers['Access-Control-Allow-Origin'] = origin
+            else:
+                response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Methods'] = 'POST, GET, DELETE, PUT, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
