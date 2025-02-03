@@ -77,6 +77,7 @@ def create_cors_middleware(allowed_origin: str):
             response = web.Response()
         else:
             response = await handler(request)
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000/'
         if 'Origin' in request.headers:
             origin = request.headers['Origin']
             logging.info(f"origin: {origin}")
