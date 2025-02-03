@@ -77,8 +77,10 @@ def create_cors_middleware(allowed_origin: str):
             response = web.Response()
         else:
             response = await handler(request)
-
-        response.headers['Access-Control-Allow-Origin'] = allowed_origin
+        if 'Origin' in request.headers:
+            origin = request.headers['Origin']
+            if allowed_origin.find(origin) != -1:
+                response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Methods'] = 'POST, GET, DELETE, PUT, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
