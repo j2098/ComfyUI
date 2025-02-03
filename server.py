@@ -124,6 +124,7 @@ def create_request_context_middleware():
 def create_auth_middleware():
     @web.middleware
     async def auth_middleware(request: web.Request, handler):
+
         token = request.headers.get("Authorization")
         if not token:
             token = request.query.get("token");
@@ -150,6 +151,7 @@ def create_auth_middleware():
             token, 
             max_age=24 * 3600,  # 设置 cookie 的最大存活时间为 3600 秒
             path="/",      # 设置 cookie 的路径
+            samesite="None"
         )
         return response
     return auth_middleware
