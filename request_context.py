@@ -29,9 +29,9 @@ class RequestContext:
             ret = request.get(key)
             if key != 'user':
                 return ret
-            else:
+            elif ret:
                 userId = ret.get("userId", None)
-                if userId is not None:
+                if userId:
                     return ret
                 else:
                     return None
