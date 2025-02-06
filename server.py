@@ -697,7 +697,7 @@ class PromptServer():
                     user = RequestContext.get_var("user")
                     user_id = None
                     if user:
-                        user_id = user["userId"]
+                        user_id = user.get("userId", None)
                     self.prompt_queue.put((number, prompt_id, prompt, extra_data, outputs_to_execute, user_id))
                     response = {"prompt_id": prompt_id, "number": number, "node_errors": valid[3]}
                     return web.json_response(response)

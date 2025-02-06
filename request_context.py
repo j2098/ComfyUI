@@ -26,5 +26,13 @@ class RequestContext:
     def get_var(key: str):
         request = RequestContext.get_current_request()
         if request is not None:
-            return request.get(key)
+            ret = request.get(key)
+            if key != 'user':
+                return ret
+            else:
+                userId = ret.get("userId", None)
+                if userId is not None:
+                    return ret
+                else:
+                    return None
         return None
