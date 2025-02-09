@@ -158,6 +158,7 @@ def prompt_worker(q, server_instance):
     last_gc_collect = 0
     need_gc = False
     gc_collect_interval = 10.0
+    last_user_id = None
 
     while True:
         timeout = 1000.0
@@ -171,6 +172,10 @@ def prompt_worker(q, server_instance):
             item, item_id = queue_item
             user_id = item[5]
             logging.info(f"user_id: {user_id}")
+            if last_user_id and last_user_id != user_id:
+                last_user_id = user_id
+                logging.info(f"user_id changed: {user_id}")
+                e.reset()
             token = RequestContext.set_current_request({})
             try:
                 RequestContext.set_var("user", {"userId": user_id})
